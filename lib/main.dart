@@ -1,22 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:wear/wear.dart';
+import 'package:flutter_android/android_hardware.dart'
+    show Sensor, SensorEvent, SensorManager;
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-        title: 'Flutter Wear App',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: WatchScreen(),
-        debugShowCheckedModeBanner: false,
-      );
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Wear App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const WatchScreen(),
+      debugShowCheckedModeBanner: false,
+    );
+  }
 }
 
-class WatchScreen extends StatelessWidget {
+class WatchScreen extends StatefulWidget {
   const WatchScreen({Key? key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => _WatchScreenState();
+}
+
+class _WatchScreenState extends State<WatchScreen> {
+  double _currentHearthRate = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Request permission if it is not granted yet
+    Permission.sensors.request();
+
+    SensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE).then((sensor) => {
+          sensor.subscribe().then((event) => {
+                event.listen((SensorEvent event) {
+                  setState(() {
+                    _currentHearthRate = event.values[0];
+                  });
+                })
+              })
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +58,39 @@ class WatchScreen extends StatelessWidget {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(
-                    'Shape: ${shape == WearShape.round ? 'round' : 'square'}',
+                  SizedBox(
+                      height: 60,
+                      width: 120,
+                      child:
+                          Image.asset('assets/images/large_healthspike.png')),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                          height: 30,
+                          width: 30,
+                          child: Image.asset('assets/images/heart_rate.png')),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                              margin: const EdgeInsets.only(left: 10, bottom: 3),
+                              child: const Text(
+                                'Heart Rate',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600, fontSize: 12),
+                              )),
+                          Container(
+                              margin: const EdgeInsets.only(left: 10),
+                              child: Text(
+                                _currentHearthRate.toString() + ' bpm',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w400, fontSize: 10),
+                              ))
+                        ],
+                      )
+                    ],
                   ),
-                  child!,
                 ],
               );
             },
@@ -49,6 +108,6 @@ class WatchScreen extends StatelessWidget {
   }
 }
 
-void main() {
-  runApp(MyApp());
+void main() async {
+  runApp(const MyApp());
 }
