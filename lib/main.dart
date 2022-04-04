@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wear/wear.dart';
+import 'package:wearable_communicator/wearable_communicator.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -50,5 +51,11 @@ class WatchScreen extends StatelessWidget {
 }
 
 void main() {
-  runApp(MyApp());
+
+  runApp(const MyApp());
+  WearableCommunicator.sendMessage({
+    "text": "Some text", 
+    "integerValue": 1
+  });
+
 }
