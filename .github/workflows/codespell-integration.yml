@@ -1,0 +1,20 @@
+name: Submit to CodeSpell
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Repository
+        uses: actions/checkout@v4
+
+      - name: Submit to CodeSpell
+        uses: code-spell/codespell-submission-action@91c41516bb441ced971378e4adaf055903370ee4
+        with:
+          content-id: e6641052-0b96-46b9-97ce-ba9129e84ff6
+          language: CPP
+          username: ${{ secrets.CODESPELL_USERNAME }}
+          password: ${{ secrets.CODESPELL_PASSWORD }}
